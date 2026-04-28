@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -33,10 +33,14 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    contact_requests = relationship(
+        "ContactRequest",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User id={self.id} email={self.email} role={self.role}>"
-
 
 
 class MatchRequest(Base):
@@ -55,12 +59,12 @@ class MatchRequest(Base):
         return f"<MatchRequest id={self.id} user_id={self.user_id} status={self.status}>"
 
 
-
 class Simulation(Base):
     __tablename__ = "simulations"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    simulation_type = Column(String, nullable=False)  # roi / sme
     title = Column(String, nullable=False)
     input_data = Column(Text, nullable=False)
     result_data = Column(Text, nullable=True)
@@ -69,4 +73,42 @@ class Simulation(Base):
     user = relationship("User", back_populates="simulations")
 
     def __repr__(self):
-        return f"<Simulation id={self.id} user_id={self.user_id} title={self.title}>"
+        return f"<Simulation id={self.id} user_id={self.user_id} type={self.simulation_type}>"
+
+
+class Supplier(Base):
+    __tablename__ = "suppliers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    category = Column(String, nullable=False)  # audit / pv / bess / cer_support / consulting
+    province = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    verified = Column(Boolean, default=False)
+    plan_tier = Column(String, nullable=False, default="free")
+
+    contact_requests = relationship(
+        "ContactRequest",
+        back_populates="supplier",
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<Supplier id={self.id} name={self.name} category={self.category}>"
+
+
+class ContactRequest(Base):
+    __tablename__ = "contact_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    supplier_id = Column(Integer, ForeignKey("suppliers.id", ondelete="CASCADE"), nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(String, nullable=False, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="contact_requests")
+    supplier = relationship("Supplier", back_populates="contact_requests")
+
+    def __repr__(self):
+        return f"<ContactRequest id={self.id} user_id={self.user_id} supplier_id={self.supplier_id}>"

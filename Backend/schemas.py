@@ -49,27 +49,6 @@ class MessageResponse(BaseModel):
 
 
 # -------------------------
-# SIMULATION SCHEMAS
-# -------------------------
-
-class SimulationCreate(BaseModel):
-    title: str
-    input_data: str
-
-
-class SimulationResponse(BaseModel):
-    id: int
-    title: str
-    input_data: str
-    result_data: Optional[str] = None
-    created_at: datetime
-    user_id: int
-
-    class Config:
-        from_attributes = True
-
-
-# -------------------------
 # MATCHING SCHEMAS
 # -------------------------
 
@@ -86,6 +65,93 @@ class MatchRequestResponse(BaseModel):
     need_type: str
     message: Optional[str] = None
     status: str
+
+    class Config:
+        from_attributes = True
+
+
+# -------------------------
+# SIMULATION SCHEMAS
+# -------------------------
+
+class ROISimulationCreate(BaseModel):
+    title: str
+    province: str
+    annual_kwh: float
+    pv_size_kw: float
+    installation_cost: float
+    electricity_price: float
+    incentive_rate: float = 0.0
+
+
+class SMESimulationCreate(BaseModel):
+    title: str
+    province: str
+    annual_kwh: float
+    pv_size_kw: float
+    battery_size_kwh: float = 0.0
+    installation_cost: float
+    electricity_price: float
+    incentive_rate: float = 0.0
+    company_size: Optional[str] = None
+    sector: Optional[str] = None
+
+
+class SimulationResponse(BaseModel):
+    id: int
+    user_id: int
+    simulation_type: str
+    title: str
+    input_data: str
+    result_data: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# -------------------------
+# SUPPLIER / ENERGY SERVICES SCHEMAS
+# -------------------------
+
+class SupplierCreate(BaseModel):
+    name: str
+    category: Literal["audit", "pv", "bess", "cer_support", "consulting"]
+    province: str
+    description: Optional[str] = None
+    verified: bool = False
+    plan_tier: str = "free"
+
+
+class SupplierResponse(BaseModel):
+    id: int
+    name: str
+    category: str
+    province: str
+    description: Optional[str] = None
+    verified: bool
+    plan_tier: str
+
+    class Config:
+        from_attributes = True
+
+
+class ContactRequestCreate(BaseModel):
+    supplier_id: int
+    message: str
+
+
+class ContactRequestUpdate(BaseModel):
+    status: Literal["pending", "responded", "closed"]
+
+
+class ContactRequestResponse(BaseModel):
+    id: int
+    user_id: int
+    supplier_id: int
+    message: str
+    status: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
