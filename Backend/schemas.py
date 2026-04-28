@@ -17,13 +17,18 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = None
-    role: Optional[Literal["user", "operator", "supplier"]] = None
+
+
+class UserRoleSelect(BaseModel):
+    role: Literal["user", "operator", "supplier"]
 
 
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
-    role: str
+    role: Optional[str] = None
+    full_name: Optional[str] = None
+    auth_provider: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -108,7 +108,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = models.User(
         email=user.email,
         password=hashed_pw,
-        role=user.role
+        role=user.role,
+        auth_provider="local"
     )
 
     try:
@@ -132,7 +133,7 @@ def login(
 ):
     db_user = db.query(models.User).filter(models.User.email == form_data.username).first()
 
-    if not db_user:
+    if not db_user or db_user.password is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -162,7 +163,9 @@ def get_me(current_user: models.User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "email": current_user.email,
-        "role": current_user.role
+        "role": current_user.role,
+        "full_name": current_user.full_name,
+        "auth_provider": current_user.auth_provider
     }
 
 
@@ -193,9 +196,6 @@ def update_me(
     if user_update.password is not None:
         current_user.password = hash_password(user_update.password)
 
-    if user_update.role is not None:
-        current_user.role = user_update.role
-
     try:
         db.commit()
         db.refresh(current_user)
@@ -211,9 +211,12 @@ def update_me(
         "user": {
             "id": current_user.id,
             "email": current_user.email,
-            "role": current_user.role
+            "role": current_user.role,
+            "full_name": current_user.full_name,
+            "auth_provider": current_user.auth_provider
         }
     }
+
 
 @router.get("/user-only")
 def user_only(current_user: models.User = Depends(require_role(["user"]))):

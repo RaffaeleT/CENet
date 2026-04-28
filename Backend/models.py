@@ -11,8 +11,17 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
-    role = Column(String, nullable=False, default="user")
+
+    # local login users have a password, social users can have None
+    password = Column(String, nullable=True)
+
+    # role is NULL until first-time onboarding is completed
+    role = Column(String, nullable=True, default=None)
+
+    # social auth fields
+    auth_provider = Column(String, nullable=True)   # google / microsoft / linkedin / local
+    provider_sub = Column(String, nullable=True)    # provider-specific user id
+    full_name = Column(String, nullable=True)
 
     match_requests = relationship("MatchRequest", back_populates="user")
     simulations = relationship("Simulation", back_populates="user")
