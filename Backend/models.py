@@ -112,3 +112,27 @@ class ContactRequest(Base):
 
     def __repr__(self):
         return f"<ContactRequest id={self.id} user_id={self.user_id} supplier_id={self.supplier_id}>"
+    
+
+class EnergyCommunity(Base):
+    __tablename__ = "energy_communities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    province = Column(String, nullable=False)
+    region = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    status = Column(String, nullable=False, default="draft")
+    manager_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)    
+    
+from sqlalchemy import JSON
+
+class EventLog(Base):
+    __tablename__ = "event_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    details = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)    

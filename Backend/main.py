@@ -12,6 +12,7 @@ from pages import router as pages_router
 from simulations import router as simulations_router
 from social_auth import router as social_auth_router
 from suppliers import router as suppliers_router
+from communities import router as communities_router
 import models
 
 load_dotenv()
@@ -34,6 +35,8 @@ app.add_middleware(
         "http://127.0.0.1:5174",
         "https://www.cenet.it",
         "https://cenet.it",
+        "https://cenet-frontend.onrender.com",
+        "https://frontend-eight-alpha.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -48,6 +51,7 @@ app.include_router(pages_router)
 app.include_router(simulations_router)
 app.include_router(social_auth_router)
 app.include_router(suppliers_router)
+app.include_router(communities_router)
 
 
 @app.get("/")

@@ -155,3 +155,24 @@ class ContactRequestResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class EnergyCommunityCreate(BaseModel):
+    name: str
+    province: str
+    region: Optional[str] = None
+    description: Optional[str] = None
+
+
+class EnergyCommunityResponse(BaseModel):
+    id: int
+    name: str
+    province: str
+    region: Optional[str] = None
+    description: Optional[str] = None
+    status: str
+    manager_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True     
+           
