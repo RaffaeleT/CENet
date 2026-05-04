@@ -34,8 +34,8 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
         "https://www.cenet.it",
-        "https://cenet.it"
-        "https://cenet-frontend.onrender.com"
+        "https://cenet.it",
+        "https://cenet-frontend.onrender.com",
         "https://frontend-eight-alpha.vercel.app",
     ],
     allow_credentials=True,
