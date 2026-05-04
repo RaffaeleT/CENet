@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, JSON
 
 from database import Base
+from sqlalchemy import JSON
 
 
 class User(Base):
@@ -106,6 +107,7 @@ class ContactRequest(Base):
     message = Column(Text, nullable=False)
     status = Column(String, nullable=False, default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
+    responded_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="contact_requests")
     supplier = relationship("Supplier", back_populates="contact_requests")
@@ -124,7 +126,10 @@ class EnergyCommunity(Base):
     description = Column(Text, nullable=True)
     status = Column(String, nullable=False, default="draft")
     manager_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)    
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<EnergyCommunity id={self.id} name={self.name} status={self.status}>"
     
 from sqlalchemy import JSON
 
@@ -135,4 +140,72 @@ class EventLog(Base):
     event_type = Column(String, nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     details = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<EventLog id={self.id} event_type={self.event_type}>" 
+
+class EventLog(Base):
+    __tablename__ = "event_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    details = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)    
+
+class CommunityMember(Base):
+    __tablename__ = "community_members"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    member_role = Column(String, nullable=False, default="member")  # member / manager
+    pod_id = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="active")  # invited / active / inactive
+    joined_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<CommunityMember id={self.id} community_id={self.community_id} user_id={self.user_id}>"  
+
+class SubscriptionContact(Base):
+    __tablename__ = "subscription_contacts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False, index=True)
+    name = Column(String, nullable=True)
+    message = Column(Text, nullable=True)
+    source = Column(String, nullable=True, default="website")
+    status = Column(String, nullable=False, default="new")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<SubscriptionContact id={self.id} email={self.email} status={self.status}>"    
+
+class ErrorLog(Base):
+    __tablename__ = "error_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    module = Column(String, nullable=True)
+    endpoint = Column(String, nullable=False)
+    error_type = Column(String, nullable=False)
+    error_message = Column(Text, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ErrorLog id={self.id} endpoint={self.endpoint} error_type={self.error_type}>"  
+
+
+class APIPerformanceLog(Base):
+    __tablename__ = "api_performance_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    endpoint = Column(String, nullable=False)
+    method = Column(String, nullable=False)
+    status_code = Column(Integer, nullable=False)
+    response_time = Column(Float, nullable=False)  # milliseconds
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<APIPerformanceLog id={self.id} endpoint={self.endpoint} status={self.status_code}>"        
