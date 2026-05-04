@@ -2,7 +2,81 @@
   "hash": "1725dae8",
   "configHash": "0f4ee18c",
   "lockfileHash": "97aa82e5",
-  "browserHash": "caef352d",
-  "optimized": {},
-  "chunks": {}
+  "browserHash": "5fe81e95",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "6bddb648",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "86084fa7",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "6563f86a",
+      "needsInterop": true
+    },
+    "react-router": {
+      "src": "../../node_modules/react-router/dist/development/index.mjs",
+      "file": "react-router.js",
+      "fileHash": "99d6fc9c",
+      "needsInterop": false
+    },
+    "react-helmet-async": {
+      "src": "../../node_modules/react-helmet-async/lib/index.esm.js",
+      "file": "react-helmet-async.js",
+      "fileHash": "aab12f84",
+      "needsInterop": false
+    },
+    "react-apexcharts": {
+      "src": "../../node_modules/react-apexcharts/dist/react-apexcharts.min.js",
+      "file": "react-apexcharts.js",
+      "fileHash": "c8cf7971",
+      "needsInterop": true
+    },
+    "flatpickr": {
+      "src": "../../node_modules/flatpickr/dist/esm/index.js",
+      "file": "flatpickr.js",
+      "fileHash": "76ffc253",
+      "needsInterop": false
+    },
+    "tailwind-merge": {
+      "src": "../../node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+      "file": "tailwind-merge.js",
+      "fileHash": "7c478bde",
+      "needsInterop": false
+    },
+    "clsx": {
+      "src": "../../node_modules/clsx/dist/clsx.mjs",
+      "file": "clsx.js",
+      "fileHash": "2494d447",
+      "needsInterop": false
+    },
+    "@react-jvectormap/core": {
+      "src": "../../node_modules/@react-jvectormap/core/dist/index.js",
+      "file": "@react-jvectormap_core.js",
+      "fileHash": "6033b334",
+      "needsInterop": true
+    },
+    "@react-jvectormap/world": {
+      "src": "../../node_modules/@react-jvectormap/world/dist/index.js",
+      "file": "@react-jvectormap_world.js",
+      "fileHash": "500d46ea",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-W24JOBID": {
+      "file": "chunk-W24JOBID.js"
+    },
+    "chunk-EWTE5DHJ": {
+      "file": "chunk-EWTE5DHJ.js"
+    }
+  }
 }

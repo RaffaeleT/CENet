@@ -6,7 +6,7 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import { registerUser } from "../services/auth";
 
-const API_BASE_URL = "https://code-lh0o.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
