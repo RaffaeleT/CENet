@@ -357,3 +357,82 @@ class APIPerformanceLogResponse(BaseModel):
 
     class Config:
         from_attributes = True        
+
+from typing import Any
+
+
+class EventLogCreate(BaseModel):
+    event_type: str
+    details: Optional[dict[str, Any]] = None
+
+
+class EventLogResponse(BaseModel):
+    id: int
+    event_type: str
+    user_id: Optional[int] = None
+    details: Optional[dict[str, Any]] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ErrorLogResponse(BaseModel):
+    id: int
+    user_id: Optional[int] = None
+    module: Optional[str] = None
+    endpoint: Optional[str] = None
+    error_type: str
+    error_message: Optional[str] = None
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class APIPerformanceLogResponse(BaseModel):
+    id: int
+    endpoint: str
+    method: str
+    status_code: int
+    response_time: float
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdminDashboardResponse(BaseModel):
+    total_users: int
+    total_communities: int
+    total_match_requests: int
+    total_simulations: int
+    total_suppliers: int
+    total_contact_requests: int
+    total_events: int
+    total_errors: int
+    total_api_logs: int
+
+
+class SubscriptionContactCreate(BaseModel):
+    email: EmailStr
+    name: Optional[str] = None
+    message: Optional[str] = None
+    source: Optional[str] = "website"
+
+
+class SubscriptionContactUpdate(BaseModel):
+    status: Literal["new", "contacted", "closed"]
+
+
+class SubscriptionContactResponse(BaseModel):
+    id: int
+    email: EmailStr
+    name: Optional[str] = None
+    message: Optional[str] = None
+    source: Optional[str] = None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True        

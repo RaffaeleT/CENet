@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, JSON
-
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Float, JSON
 from database import Base
 from sqlalchemy import JSON
 
@@ -199,4 +198,38 @@ class APIPerformanceLog(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<APIPerformanceLog id={self.id} endpoint={self.endpoint} status={self.status_code}>"        
+        return f"<APIPerformanceLog id={self.id} endpoint={self.endpoint} status={self.status_code}>"
+
+
+class ErrorLog(Base):
+    __tablename__ = "error_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    module = Column(String, nullable=True)
+    endpoint = Column(String, nullable=True)
+    error_type = Column(String, nullable=False)
+    error_message = Column(Text, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+class APIPerformanceLog(Base):
+    __tablename__ = "api_performance_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    endpoint = Column(String, nullable=False)
+    method = Column(String, nullable=False)
+    status_code = Column(Integer, nullable=False)
+    response_time = Column(Float, nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+class SubscriptionContact(Base):
+    __tablename__ = "subscription_contacts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False, index=True)
+    name = Column(String, nullable=True)
+    message = Column(Text, nullable=True)
+    source = Column(String, nullable=True, default="website")
+    status = Column(String, nullable=False, default="new")
+    created_at = Column(DateTime, default=datetime.utcnow)       
