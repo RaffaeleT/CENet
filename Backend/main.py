@@ -80,7 +80,7 @@ app.add_middleware(
         "https://www.cenet.it",
         "https://cenet.it",
         "https://cenet-frontend.onrender.com",
-        "https://frontend-eight-alpha.vercel.app",
+        "https://fronend-eight-alpha.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],

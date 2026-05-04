@@ -145,15 +145,6 @@ class EventLog(Base):
     def __repr__(self):
         return f"<EventLog id={self.id} event_type={self.event_type}>" 
 
-class EventLog(Base):
-    __tablename__ = "event_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    event_type = Column(String, nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    details = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)    
-
 class CommunityMember(Base):
     __tablename__ = "community_members"
 
