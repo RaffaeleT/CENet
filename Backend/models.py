@@ -1,9 +1,9 @@
 from datetime import datetime
 
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import relationship
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Float, JSON
+
 from database import Base
-from sqlalchemy import JSON
 
 
 class User(Base):
@@ -12,10 +12,10 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
 
-    # Local login users have a password, social users can have None
+    # Local login users have a password. Social login users can have None.
     password = Column(String, nullable=True)
 
-    # Role is NULL until first-time onboarding is completed
+    # Role is NULL until first-time onboarding is completed.
     role = Column(String, nullable=True, default=None)
 
     # Social auth fields
@@ -26,17 +26,19 @@ class User(Base):
     match_requests = relationship(
         "MatchRequest",
         back_populates="user",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
+
     simulations = relationship(
         "Simulation",
         back_populates="user",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
+
     contact_requests = relationship(
         "ContactRequest",
         back_populates="user",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self):
@@ -56,7 +58,7 @@ class MatchRequest(Base):
     user = relationship("User", back_populates="match_requests")
 
     def __repr__(self):
-        return f"<MatchRequest id={self.id} user_id={self.user_id} status={self.status}>"
+        return f"<MatchRequest id={self.id} province={self.province} status={self.status}>"
 
 
 class Simulation(Base):
@@ -73,7 +75,7 @@ class Simulation(Base):
     user = relationship("User", back_populates="simulations")
 
     def __repr__(self):
-        return f"<Simulation id={self.id} user_id={self.user_id} type={self.simulation_type}>"
+        return f"<Simulation id={self.id} type={self.simulation_type} title={self.title}>"
 
 
 class Supplier(Base):
@@ -90,7 +92,7 @@ class Supplier(Base):
     contact_requests = relationship(
         "ContactRequest",
         back_populates="supplier",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self):
@@ -112,8 +114,8 @@ class ContactRequest(Base):
     supplier = relationship("Supplier", back_populates="contact_requests")
 
     def __repr__(self):
-        return f"<ContactRequest id={self.id} user_id={self.user_id} supplier_id={self.supplier_id}>"
-    
+        return f"<ContactRequest id={self.id} status={self.status}>"
+
 
 class EnergyCommunity(Base):
     __tablename__ = "energy_communities"
@@ -129,20 +131,7 @@ class EnergyCommunity(Base):
 
     def __repr__(self):
         return f"<EnergyCommunity id={self.id} name={self.name} status={self.status}>"
-    
-from sqlalchemy import JSON
 
-class EventLog(Base):
-    __tablename__ = "event_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    event_type = Column(String, nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    details = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<EventLog id={self.id} event_type={self.event_type}>" 
 
 class CommunityMember(Base):
     __tablename__ = "community_members"
@@ -156,21 +145,21 @@ class CommunityMember(Base):
     joined_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<CommunityMember id={self.id} community_id={self.community_id} user_id={self.user_id}>"  
+        return f"<CommunityMember id={self.id} community_id={self.community_id} user_id={self.user_id}>"
 
-class SubscriptionContact(Base):
-    __tablename__ = "subscription_contacts"
+
+class EventLog(Base):
+    __tablename__ = "event_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, nullable=False, index=True)
-    name = Column(String, nullable=True)
-    message = Column(Text, nullable=True)
-    source = Column(String, nullable=True, default="website")
-    status = Column(String, nullable=False, default="new")
+    event_type = Column(String, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    details = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<SubscriptionContact id={self.id} email={self.email} status={self.status}>"    
+        return f"<EventLog id={self.id} type={self.event_type}>"
+
 
 class ErrorLog(Base):
     __tablename__ = "error_logs"
@@ -178,13 +167,13 @@ class ErrorLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     module = Column(String, nullable=True)
-    endpoint = Column(String, nullable=False)
+    endpoint = Column(String, nullable=True)
     error_type = Column(String, nullable=False)
     error_message = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<ErrorLog id={self.id} endpoint={self.endpoint} error_type={self.error_type}>"  
+        return f"<ErrorLog id={self.id} type={self.error_type}>"
 
 
 class APIPerformanceLog(Base):
@@ -201,28 +190,6 @@ class APIPerformanceLog(Base):
         return f"<APIPerformanceLog id={self.id} endpoint={self.endpoint} status={self.status_code}>"
 
 
-class ErrorLog(Base):
-    __tablename__ = "error_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    module = Column(String, nullable=True)
-    endpoint = Column(String, nullable=True)
-    error_type = Column(String, nullable=False)
-    error_message = Column(Text, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-
-class APIPerformanceLog(Base):
-    __tablename__ = "api_performance_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    endpoint = Column(String, nullable=False)
-    method = Column(String, nullable=False)
-    status_code = Column(Integer, nullable=False)
-    response_time = Column(Float, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-
-
 class SubscriptionContact(Base):
     __tablename__ = "subscription_contacts"
 
@@ -232,4 +199,7 @@ class SubscriptionContact(Base):
     message = Column(Text, nullable=True)
     source = Column(String, nullable=True, default="website")
     status = Column(String, nullable=False, default="new")
-    created_at = Column(DateTime, default=datetime.utcnow)       
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<SubscriptionContact id={self.id} email={self.email} status={self.status}>"
