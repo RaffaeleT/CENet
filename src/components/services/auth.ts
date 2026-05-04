@@ -39,6 +39,7 @@ export async function loginUser(
   const formData = new URLSearchParams();
   formData.append("username", email);
   formData.append("password", password);
+  formData.append("grant_type", "password");  
 
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
