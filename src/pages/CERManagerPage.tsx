@@ -90,7 +90,7 @@ export default function CERManagerPage() {
     async function loadDetails() {
       try {
         setError("");
-        await loadSelectedCommunityData(selectedCommunityId);
+        await loadSelectedCommunityData(selectedCommunityId!);
       } catch (err: any) {
         setError(err.message || "Could not load community details");
       }
@@ -149,7 +149,7 @@ export default function CERManagerPage() {
       setIsAddingMember(true);
       setError("");
 
-      await addCommunityMember(selectedCommunityId, {
+      await addCommunityMember(selectedCommunityId!, {
         email: memberEmail,
         role: memberRole,
       });
@@ -157,7 +157,7 @@ export default function CERManagerPage() {
       setMemberEmail("");
       setMemberRole("member");
 
-      await loadSelectedCommunityData(selectedCommunityId);
+      await loadSelectedCommunityData(selectedCommunityId!);
     } catch (err: any) {
       setError(err.message || "Could not add member");
     } finally {
