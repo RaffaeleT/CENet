@@ -8,6 +8,9 @@ export type LoginResponse = {
 export type MeResponse = {
   id: number;
   email: string;
+  role: "user" | "operator" | "supplier" | "admin";
+  full_name?: string | null;
+  auth_provider?: string | null;
 };
 
 export async function registerUser(

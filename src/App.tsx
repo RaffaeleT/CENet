@@ -10,11 +10,9 @@ import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import Profile from "./pages/Profile";
 import ROISimulatorPage from "./pages/ROISimulatorPage";
-
-// Temporary placeholders (we replace later)
-function RoiSimulator() {
-  return <div className="p-6 text-xl">ROI Simulator</div>;
-}
+import CERManagerPage from "./pages/CERManagerPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import SupplierDashboardPage from "./pages/SupplierDashboardPage";
 
 function SmeOptimizer() {
   return <div className="p-6 text-xl">SME Optimizer</div>;
@@ -38,21 +36,26 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* Layout routes */}
+        {/* App layout routes */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/dashboard" element={<Home />} />
 
-          {/* YOUR PLATFORM */}
-          <Route path="/roi" element={<RoiSimulator />} />
-          <Route path="/sme" element={<SmeOptimizer />} />
+          {/* Role dashboards */}
+          <Route path="/dashboard" element={<Home />} />
+          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+          <Route path="/cer-manager" element={<CERManagerPage />} />
+          <Route path="/supplier-dashboard" element={<SupplierDashboardPage />} />
+
+          {/* Platform modules */}
+          <Route path="/roi-simulator" element={<ROISimulatorPage />} />
+          <Route path="/sme-optimizer" element={<SmeOptimizer />} />
           <Route path="/matching" element={<MatchingPage />} />
           <Route path="/services" element={<ServicesPage />} />
+
+          {/* Account */}
           <Route path="/profile" element={<Profile />} />
-          <Route path="/roi-simulator" element={<ROISimulatorPage />} />
         </Route>
 
-        {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

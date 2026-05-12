@@ -5,7 +5,7 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import { loginUser } from "../services/auth";
+import { getMe, loginUser } from "../services/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,7 +27,18 @@ export default function SignInForm() {
     try {
       const data = await loginUser(email, password);
       localStorage.setItem("token", data.access_token);
-      navigate("/");
+
+const user = await getMe(data.access_token);
+
+if (user.role === "admin") {
+  navigate("/admin-dashboard");
+} else if (user.role === "operator") {
+  navigate("/cer-manager");
+} else if (user.role === "supplier") {
+  navigate("/supplier-dashboard");
+} else {
+  navigate("/dashboard");
+}
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
