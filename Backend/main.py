@@ -87,6 +87,7 @@ app.add_middleware(
         "https://cenet.it",
         "https://cenet-frontend.onrender.com",
         "https://fronend-eight-alpha.vercel.app",
+        "https://fronend-git-main-laerkevhs-projects.vercel.app/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
