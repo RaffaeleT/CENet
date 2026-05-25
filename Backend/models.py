@@ -203,3 +203,190 @@ class SubscriptionContact(Base):
 
     def __repr__(self):
         return f"<SubscriptionContact id={self.id} email={self.email} status={self.status}>"
+    
+    # -------------------------
+# REC ENERGY DATA
+# -------------------------
+
+class RECEnergyUpload(Base):
+    __tablename__ = "rec_energy_uploads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=False)
+    uploaded_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    filename = Column(String, nullable=False)
+    file_type = Column(String, nullable=False)
+
+    period_start = Column(DateTime, nullable=True)
+    period_end = Column(DateTime, nullable=True)
+
+    status = Column(String, nullable=False, default="uploaded")
+    validation_errors = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class RECEnergyReading(Base):
+    __tablename__ = "rec_energy_readings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=False)
+    upload_id = Column(Integer, ForeignKey("rec_energy_uploads.id", ondelete="CASCADE"), nullable=False)
+
+    pod_id = Column(String, nullable=True)
+    reading_date = Column(DateTime, nullable=False)
+
+    kwh_produced = Column(Float, nullable=False, default=0)
+    kwh_consumed = Column(Float, nullable=False, default=0)
+    kwh_shared = Column(Float, nullable=False, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -------------------------
+# PERSONAL ENERGY DATA
+# -------------------------
+
+class PersonalEnergyUpload(Base):
+    __tablename__ = "personal_energy_uploads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    filename = Column(String, nullable=False)
+    file_type = Column(String, nullable=False)
+
+    period_start = Column(DateTime, nullable=True)
+    period_end = Column(DateTime, nullable=True)
+
+    status = Column(String, nullable=False, default="uploaded")
+    validation_errors = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class PersonalEnergyReading(Base):
+    __tablename__ = "personal_energy_readings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    upload_id = Column(Integer, ForeignKey("personal_energy_uploads.id", ondelete="CASCADE"), nullable=True)
+
+    pod_id = Column(String, nullable=True)
+    reading_date = Column(DateTime, nullable=False)
+
+    kwh_consumed = Column(Float, nullable=False, default=0)
+    kwh_produced = Column(Float, nullable=False, default=0)
+    kwh_fed_to_grid = Column(Float, nullable=False, default=0)
+    kwh_self_consumed = Column(Float, nullable=False, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ManualEnergyInput(Base):
+    __tablename__ = "manual_energy_inputs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    annual_consumption_kwh = Column(Float, nullable=False)
+    system_power_kw = Column(Float, nullable=True)
+    province = Column(String, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -------------------------
+# ENERGY PRICES / INCENTIVES
+# -------------------------
+
+class EnergyPrice(Base):
+    __tablename__ = "energy_prices"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=True)
+
+    price_eur_kwh = Column(Float, nullable=False)
+    valid_from = Column(DateTime, nullable=False)
+    valid_to = Column(DateTime, nullable=True)
+
+    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class GSEIncentiveParameter(Base):
+    __tablename__ = "gse_incentive_parameters"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String, nullable=False)
+    tariff_eur_kwh = Column(Float, nullable=False)
+    description = Column(Text, nullable=True)
+
+    valid_from = Column(DateTime, nullable=True)
+    valid_to = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class CommunityCost(Base):
+    __tablename__ = "community_costs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=False)
+
+    fixed_management_cost = Column(Float, nullable=False, default=0)
+    variable_cost = Column(Float, nullable=False, default=0)
+
+    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class IncentiveAllocation(Base):
+    __tablename__ = "incentive_allocations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    community_id = Column(Integer, ForeignKey("energy_communities.id", ondelete="CASCADE"), nullable=False)
+    member_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    period_start = Column(DateTime, nullable=True)
+    period_end = Column(DateTime, nullable=True)
+
+    gross_incentive = Column(Float, nullable=False, default=0)
+    cost_share = Column(Float, nullable=False, default=0)
+    net_reimbursement = Column(Float, nullable=False, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -------------------------
+# ROI PARAMETERS
+# -------------------------
+
+class CalculationParameter(Base):
+    __tablename__ = "calculation_parameters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    parameter_name = Column(String, unique=True, nullable=False)
+    parameter_value = Column(Float, nullable=False)
+    unit = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -------------------------
+# NEWSLETTER
+# -------------------------
+
+class NewsletterSubscriber(Base):
+    __tablename__ = "newsletter_subscribers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    user_type = Column(String, nullable=True)
+    preferences = Column(JSON, nullable=True)
+
+    is_active = Column(Boolean, default=True)
+    unsubscribe_token = Column(String, unique=True, nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    unsubscribed_at = Column(DateTime, nullable=True)
