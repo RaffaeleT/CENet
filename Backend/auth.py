@@ -138,7 +138,62 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    db_user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    # -------------------------
+    # HARDCODED ADMIN LOGIN
+    # -------------------------
+    if form_data.username == "admin":
+        if form_data.password != "Admin!1234":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid admin username or password"
+            )
+
+        admin_email = "admin@cenet.local"
+
+        admin_user = (
+            db.query(models.User)
+            .filter(models.User.email == admin_email)
+            .first()
+        )
+
+        if not admin_user:
+            admin_user = models.User(
+                email=admin_email,
+                password=hash_password("Admin!1234"),
+                role="admin",
+                auth_provider="local",
+                full_name="Admin"
+            )
+
+            db.add(admin_user)
+            db.commit()
+            db.refresh(admin_user)
+
+        if admin_user.role != "admin":
+            admin_user.role = "admin"
+            db.commit()
+            db.refresh(admin_user)
+
+        access_token = create_access_token(
+            data={
+                "sub": admin_user.email,
+                "role": admin_user.role
+            }
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+
+    # -------------------------
+    # NORMAL USER LOGIN
+    # -------------------------
+    db_user = (
+        db.query(models.User)
+        .filter(models.User.email == form_data.username)
+        .first()
+    )
 
     if not db_user or db_user.password is None:
         raise HTTPException(
@@ -152,6 +207,11 @@ def login(
             detail="Invalid email or password"
         )
 
+    if hasattr(db_user, "last_login_at"):
+        db_user.last_login_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_user)
+
     access_token = create_access_token(
         data={
             "sub": db_user.email,
@@ -163,7 +223,6 @@ def login(
         "access_token": access_token,
         "token_type": "bearer"
     }
-
 
 @router.get("/me")
 def get_me(current_user: models.User = Depends(get_current_user)):
