@@ -11,10 +11,11 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
 import schemas
+import os
 
 router = APIRouter(tags=["Authentication"])
 
-SECRET_KEY = "change-this-to-a-long-random-secret-key"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -281,31 +282,4 @@ def update_me(
             "full_name": current_user.full_name,
             "auth_provider": current_user.auth_provider
         }
-    }
-
-
-@router.get("/user-only")
-def user_only(current_user: models.User = Depends(require_role(["user"]))):
-    return {
-        "message": "Welcome user",
-        "email": current_user.email,
-        "role": current_user.role
-    }
-
-
-@router.get("/operator-only")
-def operator_only(current_user: models.User = Depends(require_role(["operator"]))):
-    return {
-        "message": "Welcome operator",
-        "email": current_user.email,
-        "role": current_user.role
-    }
-
-
-@router.get("/supplier-only")
-def supplier_only(current_user: models.User = Depends(require_role(["supplier"]))):
-    return {
-        "message": "Welcome supplier",
-        "email": current_user.email,
-        "role": current_user.role
     }

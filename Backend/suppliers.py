@@ -30,6 +30,17 @@ def get_suppliers(
     return query.all()
 
 
+@router.get("/leads", response_model=list[schemas.ContactRequestResponse])
+def get_supplier_leads(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_role(["supplier", "admin"]))
+):
+    return (
+        db.query(models.ContactRequest)
+        .order_by(models.ContactRequest.created_at.desc())
+        .all()
+    )
+
 @router.get("/{supplier_id}", response_model=schemas.SupplierResponse)
 def get_supplier_by_id(
     supplier_id: int,
@@ -121,18 +132,6 @@ def create_contact_request(
     )
 
     return db_request
-
-
-@router.get("/leads", response_model=list[schemas.ContactRequestResponse])
-def get_supplier_leads(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_role(["supplier", "admin"]))
-):
-    return (
-        db.query(models.ContactRequest)
-        .order_by(models.ContactRequest.created_at.desc())
-        .all()
-    )
 
 
 @router.put("/leads/{lead_id}", response_model=schemas.ContactRequestResponse)

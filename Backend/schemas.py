@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -157,39 +157,6 @@ class ContactRequestResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class EnergyCommunityCreate(BaseModel):
-    name: str
-    province: str
-    region: Optional[str] = None
-    description: Optional[str] = None
-
-
-class EnergyCommunityResponse(BaseModel):
-    id: int
-    name: str
-    province: str
-    region: Optional[str] = None
-    description: Optional[str] = None
-    status: str
-    manager_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True     
-class EventLogCreate(BaseModel):
-    event_type: str
-    details: Optional[dict] = None
-
-
-class EventLogResponse(BaseModel):
-    id: int
-    event_type: str
-    user_id: Optional[int] = None
-    details: Optional[dict] = None
-    created_at: datetime
-
-    class Config:
-        from_attributes = True           
 
 # -------------------------
 # COMMUNITY / CER MANAGER SCHEMAS
@@ -261,7 +228,7 @@ class CommunityDashboardResponse(BaseModel):
     invited_members: int
     inactive_members: int
     total_events: int
-    recent_events: list[dict]
+    recent_events: list[dict[str, Any]]
 
 
 # -------------------------
@@ -270,14 +237,14 @@ class CommunityDashboardResponse(BaseModel):
 
 class EventLogCreate(BaseModel):
     event_type: str
-    details: Optional[dict] = None
+    details: Optional[dict[str, Any]] = None
 
 
 class EventLogResponse(BaseModel):
     id: int
     event_type: str
     user_id: Optional[int] = None
-    details: Optional[dict] = None
+    details: Optional[dict[str, Any]] = None
     created_at: datetime
 
     class Config:
@@ -298,6 +265,7 @@ class AdminDashboardResponse(BaseModel):
     total_events: int
     total_errors: int
     total_api_logs: int
+
 
 # -------------------------
 # SUBSCRIPTION / CONTACT SCHEMAS
@@ -324,7 +292,8 @@ class SubscriptionContactResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True    
+        from_attributes = True
+
 
 # -------------------------
 # ERROR LOG SCHEMAS
@@ -334,7 +303,7 @@ class ErrorLogResponse(BaseModel):
     id: int
     user_id: Optional[int] = None
     module: Optional[str] = None
-    endpoint: str
+    endpoint: Optional[str] = None
     error_type: str
     error_message: Optional[str] = None
     timestamp: datetime
@@ -356,84 +325,4 @@ class APIPerformanceLogResponse(BaseModel):
     timestamp: datetime
 
     class Config:
-        from_attributes = True        
-
-from typing import Any
-
-
-class EventLogCreate(BaseModel):
-    event_type: str
-    details: Optional[dict[str, Any]] = None
-
-
-class EventLogResponse(BaseModel):
-    id: int
-    event_type: str
-    user_id: Optional[int] = None
-    details: Optional[dict[str, Any]] = None
-    created_at: datetime
-
-    class Config:
         from_attributes = True
-
-
-class ErrorLogResponse(BaseModel):
-    id: int
-    user_id: Optional[int] = None
-    module: Optional[str] = None
-    endpoint: Optional[str] = None
-    error_type: str
-    error_message: Optional[str] = None
-    timestamp: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class APIPerformanceLogResponse(BaseModel):
-    id: int
-    endpoint: str
-    method: str
-    status_code: int
-    response_time: float
-    timestamp: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class AdminDashboardResponse(BaseModel):
-    total_users: int
-    total_communities: int
-    total_match_requests: int
-    total_simulations: int
-    total_suppliers: int
-    total_contact_requests: int
-    total_events: int
-    total_errors: int
-    total_api_logs: int
-
-
-class SubscriptionContactCreate(BaseModel):
-    email: EmailStr
-    name: Optional[str] = None
-    message: Optional[str] = None
-    source: Optional[str] = "website"
-
-
-class SubscriptionContactUpdate(BaseModel):
-    status: Literal["new", "contacted", "closed"]
-
-
-class SubscriptionContactResponse(BaseModel):
-    id: int
-    email: EmailStr
-    name: Optional[str] = None
-    message: Optional[str] = None
-    source: Optional[str] = None
-    status: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True        
-

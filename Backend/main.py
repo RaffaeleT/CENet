@@ -76,7 +76,7 @@ async def log_api_performance_middleware(request: Request, call_next):
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv("SESSION_SECRET", "fallback-secret"),
+    secret_key=os.getenv("SESSION_SECRET"),
 )
 
 app.add_middleware(
@@ -92,7 +92,7 @@ app.add_middleware(
         "https://cenet.it",
         "https://cenet-frontend.onrender.com",
         "https://fronend-eight-alpha.vercel.app",
-        "https://fronend-git-main-laerkevhs-projects.vercel.app/",
+        "https://fronend-git-main-laerkevhs-projects.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],

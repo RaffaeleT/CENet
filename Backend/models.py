@@ -1,6 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    JSON,
+    String,
+    Text,
+)
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -22,6 +32,15 @@ class User(Base):
     auth_provider = Column(String, nullable=True, default="local")
     provider_sub = Column(String, nullable=True)
     full_name = Column(String, nullable=True)
+
+    # Extra profile/reporting fields
+    province = Column(String, nullable=True)
+    user_type = Column(String, nullable=True)  # individual / condominium / sme / cer_operator
+    ateco_sector = Column(String, nullable=True)
+    email_confirmed = Column(Boolean, default=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_login_at = Column(DateTime, nullable=True)
 
     match_requests = relationship(
         "MatchRequest",
@@ -54,6 +73,8 @@ class MatchRequest(Base):
     need_type = Column(String, nullable=False)
     message = Column(Text, nullable=True)
     status = Column(String, nullable=False, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    closed_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="match_requests")
 
@@ -66,11 +87,15 @@ class Simulation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    simulation_type = Column(String, nullable=False)  # roi / sme
+    simulation_type = Column(String, nullable=False)  # roi / sme / public_roi
     title = Column(String, nullable=False)
     input_data = Column(Text, nullable=False)
     result_data = Column(Text, nullable=True)
+
+    status = Column(String, nullable=False, default="completed")  # started / completed / failed
     created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    execution_time = Column(Float, nullable=True)  # milliseconds
 
     user = relationship("User", back_populates="simulations")
 
@@ -121,6 +146,8 @@ class EnergyCommunity(Base):
     __tablename__ = "energy_communities"
 
     id = Column(Integer, primary_key=True, index=True)
+    community_code = Column(String, unique=True, nullable=True, index=True)
+
     name = Column(String, nullable=False)
     province = Column(String, nullable=False)
     region = Column(String, nullable=True)
@@ -159,6 +186,20 @@ class EventLog(Base):
 
     def __repr__(self):
         return f"<EventLog id={self.id} type={self.event_type}>"
+
+
+class ModuleUsage(Base):
+    __tablename__ = "module_usage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    module_name = Column(String, nullable=False, index=True)  # roi / sme / matching / energy_services / cer_manager
+    action = Column(String, nullable=False)  # started / completed / failed / abandoned
+    details = Column(JSON, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ModuleUsage id={self.id} module={self.module_name} action={self.action}>"
 
 
 class ErrorLog(Base):
@@ -203,8 +244,9 @@ class SubscriptionContact(Base):
 
     def __repr__(self):
         return f"<SubscriptionContact id={self.id} email={self.email} status={self.status}>"
-    
-    # -------------------------
+
+
+# -------------------------
 # REC ENERGY DATA
 # -------------------------
 
@@ -216,14 +258,17 @@ class RECEnergyUpload(Base):
     uploaded_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     filename = Column(String, nullable=False)
-    file_type = Column(String, nullable=False)
+    file_type = Column(String, nullable=False)  # csv / xlsx
 
     period_start = Column(DateTime, nullable=True)
     period_end = Column(DateTime, nullable=True)
 
-    status = Column(String, nullable=False, default="uploaded")
+    status = Column(String, nullable=False, default="uploaded")  # uploaded / validated / failed / replaced
     validation_errors = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<RECEnergyUpload id={self.id} community_id={self.community_id} status={self.status}>"
 
 
 class RECEnergyReading(Base):
@@ -241,6 +286,9 @@ class RECEnergyReading(Base):
     kwh_shared = Column(Float, nullable=False, default=0)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<RECEnergyReading id={self.id} pod_id={self.pod_id} date={self.reading_date}>"
 
 
 # -------------------------
@@ -263,6 +311,9 @@ class PersonalEnergyUpload(Base):
     validation_errors = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<PersonalEnergyUpload id={self.id} user_id={self.user_id} status={self.status}>"
+
 
 class PersonalEnergyReading(Base):
     __tablename__ = "personal_energy_readings"
@@ -281,6 +332,9 @@ class PersonalEnergyReading(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<PersonalEnergyReading id={self.id} user_id={self.user_id} date={self.reading_date}>"
+
 
 class ManualEnergyInput(Base):
     __tablename__ = "manual_energy_inputs"
@@ -293,6 +347,9 @@ class ManualEnergyInput(Base):
     province = Column(String, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ManualEnergyInput id={self.id} user_id={self.user_id} annual_consumption={self.annual_consumption_kwh}>"
 
 
 # -------------------------
@@ -312,6 +369,9 @@ class EnergyPrice(Base):
     created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<EnergyPrice id={self.id} price={self.price_eur_kwh}>"
+
 
 class GSEIncentiveParameter(Base):
     __tablename__ = "gse_incentive_parameters"
@@ -326,6 +386,9 @@ class GSEIncentiveParameter(Base):
     valid_to = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<GSEIncentiveParameter id={self.id} name={self.name} tariff={self.tariff_eur_kwh}>"
+
 
 class CommunityCost(Base):
     __tablename__ = "community_costs"
@@ -338,6 +401,9 @@ class CommunityCost(Base):
 
     created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<CommunityCost id={self.id} community_id={self.community_id}>"
 
 
 class IncentiveAllocation(Base):
@@ -356,6 +422,9 @@ class IncentiveAllocation(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<IncentiveAllocation id={self.id} community_id={self.community_id} member_user_id={self.member_user_id}>"
+
 
 # -------------------------
 # ROI PARAMETERS
@@ -370,6 +439,9 @@ class CalculationParameter(Base):
     unit = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<CalculationParameter id={self.id} name={self.parameter_name} value={self.parameter_value}>"
 
 
 # -------------------------
@@ -390,3 +462,6 @@ class NewsletterSubscriber(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     unsubscribed_at = Column(DateTime, nullable=True)
+
+    def __repr__(self):
+        return f"<NewsletterSubscriber id={self.id} email={self.email} active={self.is_active}>"
