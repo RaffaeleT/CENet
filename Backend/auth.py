@@ -142,7 +142,7 @@ def login(
     # -------------------------
     # HARDCODED ADMIN LOGIN
     # -------------------------
-    if form_data.username == "admin":
+    if form_data.username == "admin@gmail.com":
         if form_data.password != "Admin!1234":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
