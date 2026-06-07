@@ -2,9 +2,9 @@
 .DS_Store
 
 # ---- frontend (Vite / Node) ----
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
+node_modules/
+dist/
+.vite/
 *.local
 
 # ---- backend (Python) ----
