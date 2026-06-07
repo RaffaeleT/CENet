@@ -18,3 +18,5 @@ backend/test.db
 .env
 .env.*
 !.env.example
+
+.mcp.json
