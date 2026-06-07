@@ -78,21 +78,30 @@ app.add_middleware(
     secret_key=os.getenv("SESSION_SECRET"),
 )
 
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "https://www.cenet.it",
+    "https://cenet.it",
+    "https://cenet-frontend.onrender.com",
+    "https://fronend-eight-alpha.vercel.app",
+    "https://fronend-git-main-laerkevhs-projects.vercel.app",
+    # Azure Static Web App (production frontend)
+    "https://ambitious-meadow-0a6262703.7.azurestaticapps.net",
+]
+
+# Allow an extra origin to be injected via env (e.g. FRONTEND_URL) without a code change.
+_frontend_url = os.getenv("FRONTEND_URL")
+if _frontend_url and _frontend_url not in allowed_origins:
+    allowed_origins.append(_frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-        "https://www.cenet.it",
-        "https://cenet.it",
-        "https://cenet-frontend.onrender.com",
-        "https://fronend-eight-alpha.vercel.app",
-        "https://fronend-git-main-laerkevhs-projects.vercel.app",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
