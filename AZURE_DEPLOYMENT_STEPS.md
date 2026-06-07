@@ -78,7 +78,7 @@ $BackendPlan = "cenet-backend-plan"
 az appservice plan create `
   --name $BackendPlan `
   --resource-group $ResourceGroup `
-  --sku B2 `
+  --sku F1 `
   --is-linux
 
 # Verify
@@ -86,7 +86,7 @@ az appservice plan show --name $BackendPlan --resource-group $ResourceGroup
 ```
 
 **Explanation:**
-- **B2**: Small production-ready tier (~£50/month). Use **B1** for testing (~£8/month).
+- **F1**: Free tier. Sufficient for 1-5 test users. App sleeps after 20 min inactivity (~30s cold start on next request).
 - **--is-linux**: Python requires Linux runtime
 
 ### Step 6: Create App Service (for FastAPI backend)

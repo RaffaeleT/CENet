@@ -89,7 +89,7 @@ function New-AppServicePlan {
     $plan = az appservice plan create `
         --name "$BackendAppName-plan" `
         --resource-group $ResourceGroup `
-        --sku B2 `
+        --sku F1 `
         --is-linux `
         --output json | ConvertFrom-Json
 

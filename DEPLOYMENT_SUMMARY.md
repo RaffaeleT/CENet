@@ -101,14 +101,12 @@ VITE_API_BASE_URL      = https://cenet-backend.azurewebsites.net
 
 | Resource | Tier | Cost |
 |----------|------|------|
-| **App Service** | B2 (Linux) | ~€50 |
+| **App Service** | F1 (Free, Linux) | €0 |
 | **Static Web App** | Free | €0 |
 | **Supabase** | Free/Pro | €0-100 |
-| **Total** | | ~€50+ |
+| **Total** | | €0 |
 
-**Options to reduce costs:**
-- Use **B1** tier for App Service (~€8/month, slower)
-- Keep Supabase on free tier (good for development)
+**Note:** F1 tier has 60 CPU min/day and the app sleeps after 20 min of inactivity. Fine for 1-5 test users.
 - Scale up only when needed
 
 ## 🚀 Deployment Timeline
@@ -237,7 +235,7 @@ az webapp log stream --name cenet-backend --resource-group cenet-rg
 ### Scaling
 
 As your app grows:
-- Upgrade App Service tier (B2 → B3 → S1)
+- Upgrade App Service tier (F1 → B1 → B2 → S1)
 - Upgrade Supabase plan (Pro → Business)
 - Add Azure CDN for better global performance
 

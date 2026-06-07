@@ -88,15 +88,12 @@ Your Azure Subscription
 
 | Service | Free/Tier | Monthly Cost |
 |---------|-----------|--------------|
-| Azure App Service | B2 | ~€50 |
+| Azure App Service | F1 (Free) | €0 |
 | Azure Static Web Apps | Free | €0 |
-| Supabase | Free tier | €0 (upgrade to Pro ~€25 for production) |
-| **Total** | | ~€50 |
+| Supabase | Free tier | €0 |
+| **Total** | | **€0** |
 
-**How to save costs:**
-- Use B1 tier instead of B2 (~€8/month, slower)
-- Keep Supabase on free tier (development)
-- Scale up when needed
+**Note:** F1 sleeps after 20 min inactivity. First request after sleep takes ~30s. Fine for 1-5 test users.
 
 ## ⏱️ Time Estimates
 

@@ -54,11 +54,11 @@ az group show --name cenet-rg
 ### 2b. Backend - App Service for FastAPI
 
 ```bash
-# Create App Service Plan (B1 = budget-friendly, B2 = better performance)
+# Create App Service Plan (F1 = free tier, sufficient for 1-5 test users)
 az appservice plan create \
   --name cenet-backend-plan \
   --resource-group cenet-rg \
-  --sku B2 \
+  --sku F1 \
   --is-linux
 
 # Create App Service (Python 3.11)

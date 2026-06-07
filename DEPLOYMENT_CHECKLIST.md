@@ -34,7 +34,7 @@ Use this checklist to track your progress through the deployment process.
 ### App Service Plan (Backend)
 - [ ] Created App Service Plan: `cenet-backend-plan`
   ```powershell
-  az appservice plan create --name cenet-backend-plan --resource-group cenet-rg --sku B2 --is-linux
+  az appservice plan create --name cenet-backend-plan --resource-group cenet-rg --sku F1 --is-linux
   ```
 
 ### App Service (Backend API)

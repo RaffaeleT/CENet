@@ -23,7 +23,7 @@ az group create --name $ResourceGroup --location $Location
 ## 2️⃣ Create App Service Plan & App
 
 ```powershell
-az appservice plan create --name "$BackendApp-plan" --resource-group $ResourceGroup --sku B2 --is-linux
+az appservice plan create --name "$BackendApp-plan" --resource-group $ResourceGroup --sku F1 --is-linux
 
 az webapp create --name $BackendApp --resource-group $ResourceGroup --plan "$BackendApp-plan" --runtime "PYTHON:3.11"
 ```
