@@ -326,3 +326,191 @@ class APIPerformanceLogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# -------------------------
+# REC ENERGY SCHEMAS
+# -------------------------
+
+class RECEnergyUploadResponse(BaseModel):
+    id: int
+    community_id: int
+    uploaded_by: int
+    filename: str
+    file_type: str
+    period_start: Optional[datetime] = None
+    period_end: Optional[datetime] = None
+    status: str
+    validation_errors: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class RECKPIResponse(BaseModel):
+    community_id: int
+    total_produced_kwh: float
+    total_consumed_kwh: float
+    total_shared_kwh: float
+    self_consumption_percentage: float
+
+
+class RECTrendResponse(BaseModel):
+    period: str
+    produced_kwh: float
+    consumed_kwh: float
+    shared_kwh: float
+
+
+class RECMemberEnergyResponse(BaseModel):
+    pod_id: str
+    produced_kwh: float
+    consumed_kwh: float
+    shared_kwh: float
+
+
+# -------------------------
+# PERSONAL ENERGY SCHEMAS
+# -------------------------
+
+class PersonalEnergyUploadResponse(BaseModel):
+    id: int
+    user_id: int
+    filename: str
+    file_type: str
+    period_start: Optional[datetime] = None
+    period_end: Optional[datetime] = None
+    status: str
+    validation_errors: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ManualEnergyInputCreate(BaseModel):
+    annual_consumption_kwh: float
+    system_power_kw: Optional[float] = None
+    province: Optional[str] = None
+
+
+class ManualEnergyInputResponse(BaseModel):
+    id: int
+    user_id: int
+    annual_consumption_kwh: float
+    system_power_kw: Optional[float] = None
+    province: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PersonalKPIResponse(BaseModel):
+    user_id: int
+    total_consumed_kwh: float
+    total_produced_kwh: float
+    total_fed_to_grid_kwh: float
+    total_self_consumed_kwh: float
+    average_monthly_consumption_kwh: float
+    self_consumption_percentage: float
+
+
+# -------------------------
+# REC INCENTIVE SCHEMAS
+# -------------------------
+
+class EnergyPriceCreate(BaseModel):
+    price_eur_kwh: float
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+
+
+class EnergyPriceResponse(BaseModel):
+    id: int
+    community_id: int
+    price_eur_kwh: float
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+    created_by: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CommunityCostCreate(BaseModel):
+    fixed_management_cost: float = 0.0
+    variable_cost: float = 0.0
+
+
+class CommunityCostResponse(BaseModel):
+    id: int
+    community_id: int
+    fixed_management_cost: float
+    variable_cost: float
+    created_by: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class GSEIncentiveParameterCreate(BaseModel):
+    name: str
+    tariff_eur_kwh: float
+    description: Optional[str] = None
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+
+
+class GSEIncentiveParameterResponse(BaseModel):
+    id: int
+    name: str
+    tariff_eur_kwh: float
+    description: Optional[str] = None
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class IncentiveAllocationResponse(BaseModel):
+    id: int
+    community_id: int
+    member_user_id: int
+    gross_incentive: float
+    cost_share: float
+    net_reimbursement: float
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# -------------------------
+# NEWSLETTER SCHEMAS
+# -------------------------
+
+class NewsletterSubscribeCreate(BaseModel):
+    email: str
+    name: Optional[str] = None
+    user_type: Optional[str] = None
+    preferences: Optional[dict] = None
+
+
+class NewsletterSubscriberResponse(BaseModel):
+    id: int
+    email: str
+    name: Optional[str] = None
+    user_type: Optional[str] = None
+    preferences: Optional[dict] = None
+    is_active: bool
+    unsubscribed_at: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
