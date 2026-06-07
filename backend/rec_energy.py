@@ -1,8 +1,9 @@
+import csv
 import io
 from datetime import datetime
 from typing import Optional
 
-import pandas as pd
+import openpyxl
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
@@ -22,68 +23,109 @@ REQUIRED_COLUMNS = {
     "kwh_shared"
 }
 
+_DATE_FORMATS = (
+    "%Y-%m-%d",
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
+)
 
-def read_energy_file(file: UploadFile) -> pd.DataFrame:
+
+def _parse_date(val) -> Optional[datetime]:
+    if val is None:
+        return None
+    s = str(val).strip()
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+    return None
+
+
+def _parse_float(val) -> Optional[float]:
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def read_energy_file(file: UploadFile) -> list:
     content = file.file.read()
 
     if file.filename.lower().endswith(".csv"):
-        return pd.read_csv(io.BytesIO(content))
+        reader = csv.DictReader(io.StringIO(content.decode("utf-8-sig")))
+        return [dict(row) for row in reader]
 
-    if file.filename.lower().endswith((".xlsx", ".xls")):
-        return pd.read_excel(io.BytesIO(content))
+    if file.filename.lower().endswith(".xlsx"):
+        wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        ws = wb.active
+        rows = list(ws.rows)
+        if not rows:
+            return []
+        headers = [str(c.value).strip() if c.value is not None else "" for c in rows[0]]
+        return [{headers[i]: cell.value for i, cell in enumerate(row)} for row in rows[1:]]
 
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Only CSV and Excel files are supported"
+        detail="Only CSV and .xlsx files are supported"
     )
 
 
-def validate_energy_dataframe(df: pd.DataFrame):
+def validate_energy_dataframe(rows: list):
     errors = []
 
-    normalized_columns = {col: col.strip().lower() for col in df.columns}
-    df.rename(columns=normalized_columns, inplace=True)
-
-    missing_columns = REQUIRED_COLUMNS - set(df.columns)
-
-    if missing_columns:
-        errors.append({
-            "type": "missing_columns",
-            "columns": list(missing_columns)
-        })
+    if not rows:
+        errors.append({"type": "empty_file"})
         return errors, None, None
 
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    # Normalize column names in-place
+    rows[:] = [{k.strip().lower(): v for k, v in row.items()} for row in rows]
 
-    if df["date"].isna().any():
+    missing_columns = REQUIRED_COLUMNS - set(rows[0].keys())
+    if missing_columns:
+        errors.append({"type": "missing_columns", "columns": list(missing_columns)})
+        return errors, None, None
+
+    dates = []
+    date_invalid = False
+    for row in rows:
+        parsed = _parse_date(row["date"])
+        if parsed is None:
+            date_invalid = True
+        row["date"] = parsed
+        if parsed:
+            dates.append(parsed)
+
+    if date_invalid:
         errors.append({
             "type": "invalid_dates",
             "message": "One or more rows contain invalid dates."
         })
 
     for col in ["kwh_produced", "kwh_consumed", "kwh_shared"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        has_invalid = has_negative = False
+        for row in rows:
+            val = _parse_float(row.get(col))
+            if val is None:
+                has_invalid = True
+            elif val < 0:
+                has_negative = True
+            row[col] = val
+        if has_invalid:
+            errors.append({"type": "invalid_numeric_values", "column": col})
+        if has_negative:
+            errors.append({"type": "negative_values", "column": col})
 
-        if df[col].isna().any():
-            errors.append({
-                "type": "invalid_numeric_values",
-                "column": col
-            })
-
-        if (df[col] < 0).any():
-            errors.append({
-                "type": "negative_values",
-                "column": col
-            })
-
-    if df["pod_id"].isna().any():
+    if any(row.get("pod_id") is None or str(row.get("pod_id", "")).strip() == "" for row in rows):
         errors.append({
             "type": "missing_pod_id",
             "message": "One or more rows are missing POD ID."
         })
 
-    period_start = df["date"].min().to_pydatetime() if not df["date"].isna().all() else None
-    period_end = df["date"].max().to_pydatetime() if not df["date"].isna().all() else None
+    period_start = min(dates) if dates else None
+    period_end = max(dates) if dates else None
 
     return errors, period_start, period_end
 
@@ -124,8 +166,8 @@ def upload_rec_energy_file(
 ):
     get_owned_community(db, community_id, current_user)
 
-    df = read_energy_file(file)
-    errors, period_start, period_end = validate_energy_dataframe(df)
+    rows = read_energy_file(file)
+    errors, period_start, period_end = validate_energy_dataframe(rows)
 
     upload = models.RECEnergyUpload(
         community_id=community_id,
@@ -168,13 +210,13 @@ def upload_rec_energy_file(
 
     readings = []
 
-    for _, row in df.iterrows():
+    for row in rows:
         readings.append(
             models.RECEnergyReading(
                 community_id=community_id,
                 upload_id=upload.id,
                 pod_id=str(row["pod_id"]),
-                reading_date=row["date"].to_pydatetime(),
+                reading_date=row["date"],
                 kwh_produced=float(row["kwh_produced"]),
                 kwh_consumed=float(row["kwh_consumed"]),
                 kwh_shared=float(row["kwh_shared"])

@@ -1,6 +1,9 @@
+import csv
 import io
+from datetime import datetime
+from typing import Optional
 
-import pandas as pd
+import openpyxl
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
@@ -20,47 +23,97 @@ REQUIRED_COLUMNS = {
     "kwh_self_consumed"
 }
 
+_DATE_FORMATS = (
+    "%Y-%m-%d",
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
+)
 
-def read_file(file: UploadFile) -> pd.DataFrame:
+
+def _parse_date(val) -> Optional[datetime]:
+    if val is None:
+        return None
+    s = str(val).strip()
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+    return None
+
+
+def _parse_float(val) -> Optional[float]:
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def read_file(file: UploadFile) -> list:
     content = file.file.read()
 
     if file.filename.lower().endswith(".csv"):
-        return pd.read_csv(io.BytesIO(content))
+        reader = csv.DictReader(io.StringIO(content.decode("utf-8-sig")))
+        return [dict(row) for row in reader]
 
-    if file.filename.lower().endswith((".xlsx", ".xls")):
-        return pd.read_excel(io.BytesIO(content))
+    if file.filename.lower().endswith(".xlsx"):
+        wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        ws = wb.active
+        rows = list(ws.rows)
+        if not rows:
+            return []
+        headers = [str(c.value).strip() if c.value is not None else "" for c in rows[0]]
+        return [{headers[i]: cell.value for i, cell in enumerate(row)} for row in rows[1:]]
 
-    raise HTTPException(status_code=400, detail="Only CSV and Excel files are supported")
+    raise HTTPException(status_code=400, detail="Only CSV and .xlsx files are supported")
 
 
-def validate_dataframe(df: pd.DataFrame):
+def validate_dataframe(rows: list):
     errors = []
 
-    normalized_columns = {col: col.strip().lower() for col in df.columns}
-    df.rename(columns=normalized_columns, inplace=True)
+    if not rows:
+        errors.append({"type": "empty_file"})
+        return errors, None, None
 
-    missing_columns = REQUIRED_COLUMNS - set(df.columns)
+    # Normalize column names in-place
+    rows[:] = [{k.strip().lower(): v for k, v in row.items()} for row in rows]
 
+    missing_columns = REQUIRED_COLUMNS - set(rows[0].keys())
     if missing_columns:
         errors.append({"type": "missing_columns", "columns": list(missing_columns)})
         return errors, None, None
 
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    dates = []
+    date_invalid = False
+    for row in rows:
+        parsed = _parse_date(row["date"])
+        if parsed is None:
+            date_invalid = True
+        row["date"] = parsed
+        if parsed:
+            dates.append(parsed)
 
-    if df["date"].isna().any():
+    if date_invalid:
         errors.append({"type": "invalid_dates"})
 
     for col in ["kwh_consumed", "kwh_produced", "kwh_fed_to_grid", "kwh_self_consumed"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-
-        if df[col].isna().any():
+        has_invalid = has_negative = False
+        for row in rows:
+            val = _parse_float(row.get(col))
+            if val is None:
+                has_invalid = True
+            elif val < 0:
+                has_negative = True
+            row[col] = val
+        if has_invalid:
             errors.append({"type": "invalid_numeric_values", "column": col})
-
-        if (df[col] < 0).any():
+        if has_negative:
             errors.append({"type": "negative_values", "column": col})
 
-    period_start = df["date"].min().to_pydatetime() if not df["date"].isna().all() else None
-    period_end = df["date"].max().to_pydatetime() if not df["date"].isna().all() else None
+    period_start = min(dates) if dates else None
+    period_end = max(dates) if dates else None
 
     return errors, period_start, period_end
 
@@ -71,8 +124,8 @@ def upload_personal_energy_file(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    df = read_file(file)
-    errors, period_start, period_end = validate_dataframe(df)
+    rows = read_file(file)
+    errors, period_start, period_end = validate_dataframe(rows)
 
     upload = models.PersonalEnergyUpload(
         user_id=current_user.id,
@@ -110,13 +163,13 @@ def upload_personal_energy_file(
 
     readings = []
 
-    for _, row in df.iterrows():
+    for row in rows:
         readings.append(
             models.PersonalEnergyReading(
                 user_id=current_user.id,
                 upload_id=upload.id,
-                pod_id=str(row["pod_id"]) if "pod_id" in df.columns else None,
-                reading_date=row["date"].to_pydatetime(),
+                pod_id=str(row["pod_id"]) if row.get("pod_id") is not None else None,
+                reading_date=row["date"],
                 kwh_consumed=float(row["kwh_consumed"]),
                 kwh_produced=float(row["kwh_produced"]),
                 kwh_fed_to_grid=float(row["kwh_fed_to_grid"]),

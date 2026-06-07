@@ -29,7 +29,6 @@ python-dotenv
 authlib
 httpx
 itsdangerous
-pandas
 openpyxl
 gunicorn
 python-decouple
