@@ -26,26 +26,26 @@ Use this checklist to track your progress through the deployment process.
 ## 🏗️ Phase 1: Create Azure Resources
 
 ### Resource Group
-- [ ] Created resource group: `cenet-rg` in `westeurope`
+- [ ] Created resource group: `rgCenet` in `italynorth`
   ```powershell
-  az group create --name cenet-rg --location westeurope
+  az group create --name rgCenet --location italynorth
   ```
 
 ### App Service Plan (Backend)
 - [ ] Created App Service Plan: `cenet-backend-plan`
   ```powershell
-  az appservice plan create --name cenet-backend-plan --resource-group cenet-rg --sku F1 --is-linux
+  az appservice plan create --name cenet-backend-plan --resource-group rgCenet --sku F1 --is-linux
   ```
 
 ### App Service (Backend API)
 - [ ] Created App Service: `cenet-backend` (Python 3.11)
   ```powershell
-  az webapp create --name cenet-backend --resource-group cenet-rg --plan cenet-backend-plan --runtime "PYTHON:3.11"
+  az webapp create --name cenet-backend --resource-group rgCenet --plan cenet-backend-plan --runtime "PYTHON:3.11"
   ```
 
 - [ ] Verified app URL
   ```powershell
-  az webapp show --name cenet-backend --resource-group cenet-rg --query defaultHostName
+  az webapp show --name cenet-backend --resource-group rgCenet --query defaultHostName
   ```
   - Should show: `cenet-backend.azurewebsites.net`
 
@@ -72,19 +72,19 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Verified all settings saved
   ```powershell
-  az webapp config appsettings list --name cenet-backend --resource-group cenet-rg --output table
+  az webapp config appsettings list --name cenet-backend --resource-group rgCenet --output table
   ```
 
 ### Startup Configuration
 - [ ] Set startup command
   ```powershell
-  az webapp config set --name cenet-backend --resource-group cenet-rg --startup-file "gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main:app"
+  az webapp config set --name cenet-backend --resource-group rgCenet --startup-file "gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main:app"
   ```
 
 ### Git Deployment
 - [ ] Enabled Git deployment
   ```powershell
-  az webapp deployment source config-local-git --name cenet-backend --resource-group cenet-rg
+  az webapp deployment source config-local-git --name cenet-backend --resource-group rgCenet
   ```
 
 - [ ] Saved Git URL: `_____________________________`
@@ -109,7 +109,7 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Monitored deployment logs
   ```powershell
-  az webapp log stream --name cenet-backend --resource-group cenet-rg
+  az webapp log stream --name cenet-backend --resource-group rgCenet
   ```
 
 - [ ] Verified deployment success
@@ -131,9 +131,9 @@ Use this checklist to track your progress through the deployment process.
 ## 📦 Phase 4: Create Frontend Infrastructure
 
 ### Static Web App
-- [ ] Created Static Web App: `cenet-frontend` in `westus2`
+- [ ] Created Static Web App: `cenet-frontend` in `italynorth`
   ```powershell
-  az staticwebapp create --name cenet-frontend --resource-group cenet-rg --location westus2 --sku free
+  az staticwebapp create --name cenet-frontend --resource-group rgCenet --location italynorth --sku free
   ```
 
 - [ ] Saved frontend URL: `https://cenet-frontend.azurestaticapps.net`
@@ -144,7 +144,7 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Verified settings saved
   ```powershell
-  az staticwebapp appsettings set --name cenet-frontend --resource-group cenet-rg --setting-names VITE_API_BASE_URL="https://cenet-backend.azurewebsites.net"
+  az staticwebapp appsettings set --name cenet-frontend --resource-group rgCenet --setting-names VITE_API_BASE_URL="https://cenet-backend.azurewebsites.net"
   ```
 
 ## 🤖 Phase 5: Setup GitHub Actions
@@ -156,7 +156,7 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Created Static Web App deployment token
   ```powershell
-  az staticwebapp secrets list --name cenet-frontend --resource-group cenet-rg --query "properties.apiKey"
+  az staticwebapp secrets list --name cenet-frontend --resource-group rgCenet --query "properties.apiKey"
   ```
   - Token saved: `_____________________________`
 
@@ -209,7 +209,7 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Restarted backend app
   ```powershell
-  az webapp restart --name cenet-backend --resource-group cenet-rg
+  az webapp restart --name cenet-backend --resource-group rgCenet
   ```
 
 - [ ] Verified no CORS errors in frontend
@@ -229,7 +229,7 @@ Use this checklist to track your progress through the deployment process.
 
 - [ ] Checked backend logs
   ```powershell
-  az webapp log stream --name cenet-backend --resource-group cenet-rg
+  az webapp log stream --name cenet-backend --resource-group rgCenet
   ```
   - Should show: Request logs, no major errors
 
@@ -265,7 +265,7 @@ Use this checklist to track your progress through the deployment process.
 ### Logging
 - [ ] Set up log streaming for backend
   ```powershell
-  az webapp log stream --name cenet-backend --resource-group cenet-rg
+  az webapp log stream --name cenet-backend --resource-group rgCenet
   ```
 
 - [ ] Checked Azure Portal for Static Web App logs
@@ -324,10 +324,10 @@ Use this checklist to track your progress through the deployment process.
 If something isn't working:
 
 ### Backend won't start
-- [ ] Check logs: `az webapp log stream --name cenet-backend --resource-group cenet-rg`
+- [ ] Check logs: `az webapp log stream --name cenet-backend --resource-group rgCenet`
 - [ ] Verify `DATABASE_URL` format is correct
 - [ ] Verify Supabase firewall allows Azure IPs
-- [ ] Restart app: `az webapp restart --name cenet-backend --resource-group cenet-rg`
+- [ ] Restart app: `az webapp restart --name cenet-backend --resource-group rgCenet`
 
 ### Frontend won't deploy
 - [ ] Check GitHub Actions logs

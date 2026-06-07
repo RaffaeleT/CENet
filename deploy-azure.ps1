@@ -9,7 +9,7 @@ and configures them for the CENet application.
 
 param(
     [Parameter(Mandatory = $false)]
-    [string]$ResourceGroup = "cenet-rg",
+    [string]$ResourceGroup = "rgCenet",
 
     [Parameter(Mandatory = $false)]
     [string]$BackendAppName = "cenet-backend",
@@ -18,7 +18,7 @@ param(
     [string]$FrontendAppName = "cenet-frontend",
 
     [Parameter(Mandatory = $false)]
-    [string]$Location = "westeurope",
+    [string]$Location = "italynorth",
 
     [Parameter(Mandatory = $false)]
     [string]$DatabaseUrl = "",

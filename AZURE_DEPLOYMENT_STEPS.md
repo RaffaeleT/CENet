@@ -56,8 +56,8 @@ PYTHON_PATH=/home/site/wwwroot
 
 ```powershell
 # Set variables
-$ResourceGroup = "cenet-rg"
-$Location = "westeurope"
+$ResourceGroup = "rgCenet"
+$Location = "italynorth"
 
 # Create resource group
 az group create `
@@ -68,7 +68,7 @@ az group create `
 az group show --name $ResourceGroup
 ```
 
-Expected output: Shows resource group in westeurope region.
+Expected output: Shows resource group in italynorth region.
 
 ### Step 5: Create App Service Plan (for backend)
 
@@ -249,7 +249,7 @@ Invoke-WebRequest "$BackendUrl/docs" -UseBasicParsing
 
 ```powershell
 $FrontendApp = "cenet-frontend"
-$StaticLocation = "westus2"  # Static Web Apps require specific regions
+$StaticLocation = "italynorth"
 
 # Create the Static Web App
 az staticwebapp create `
@@ -268,7 +268,7 @@ $FrontendUrl = az staticwebapp show `
 Write-Host "Frontend URL: https://$FrontendUrl"
 ```
 
-> **Note:** Static Web Apps are only available in `westus2`, `eastus2`, `westeurope`, `eastasia`, `centralindia`. Use `westeurope` equivalent to `westus2`.
+> **Note:** Static Web Apps are available in multiple Azure regions including `italynorth`.
 
 ### Step 15: Configure Frontend Environment
 

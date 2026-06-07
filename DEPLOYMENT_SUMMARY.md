@@ -139,7 +139,7 @@ After deployment, you should have:
 #### 1. "Could not connect to database"
 ```powershell
 # Check connection string
-az webapp config appsettings list --name cenet-backend --resource-group cenet-rg | findstr DATABASE_URL
+az webapp config appsettings list --name cenet-backend --resource-group rgCenet | findstr DATABASE_URL
 
 # Add Supabase firewall rule: Allow 0.0.0.0/0 (or specific Azure IPs)
 ```
@@ -150,13 +150,13 @@ az webapp config appsettings list --name cenet-backend --resource-group cenet-rg
 # Then redeploy: git subtree push --prefix backend azure main
 
 # Restart app
-az webapp restart --name cenet-backend --resource-group cenet-rg
+az webapp restart --name cenet-backend --resource-group rgCenet
 ```
 
 #### 3. "500 error from API"
 ```powershell
 # Check logs
-az webapp log stream --name cenet-backend --resource-group cenet-rg
+az webapp log stream --name cenet-backend --resource-group rgCenet
 ```
 
 #### 4. "Frontend won't build"
@@ -198,7 +198,7 @@ Before going to production:
 
 1. Check the **Troubleshooting** section above
 2. Review the detailed [AZURE_DEPLOYMENT_STEPS.md](./AZURE_DEPLOYMENT_STEPS.md)
-3. Check Azure logs: `az webapp log stream --name cenet-backend --resource-group cenet-rg`
+3. Check Azure logs: `az webapp log stream --name cenet-backend --resource-group rgCenet`
 4. Check GitHub Actions logs for frontend deployment
 5. Verify Supabase is accessible and connection string is correct
 
@@ -227,7 +227,7 @@ git push origin main
 
 ```powershell
 # Watch backend logs
-az webapp log stream --name cenet-backend --resource-group cenet-rg
+az webapp log stream --name cenet-backend --resource-group rgCenet
 
 # Check Static Web App status (Azure Portal → cenet-frontend)
 ```

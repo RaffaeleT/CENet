@@ -5,10 +5,10 @@ Copy-paste commands for rapid Azure deployment. **Follow the full guide in AZURE
 ## Configuration
 
 ```powershell
-$ResourceGroup = "cenet-rg"
+$ResourceGroup = "rgCenet"
 $BackendApp = "cenet-backend"
 $FrontendApp = "cenet-frontend"
-$Location = "westeurope"
+$Location = "italynorth"
 $DatabaseUrl = "postgresql://YOUR_SUPABASE_CONNECTION_STRING"
 $SecretKey = "your-secret-key"
 $SessionSecret = "your-session-secret"
@@ -90,11 +90,11 @@ Start-Process "https://$BackendUrl/docs"
 ## 9️⃣ Create Static Web App
 
 ```powershell
-# Note: Static Web Apps only available in specific regions
+# Deploy Static Web App to Italy North
 az staticwebapp create `
   --name $FrontendApp `
   --resource-group $ResourceGroup `
-  --location "westus2" `
+  --location $Location `
   --sku free
 ```
 

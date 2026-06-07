@@ -69,7 +69,7 @@ Welcome! Your CENet monorepo is now fully configured for deployment to Azure wit
 
 ```
 Your Azure Subscription
-├── Resource Group (cenet-rg)
+├── Resource Group (rgCenet) — Italy North
 │   ├── App Service (cenet-backend)
 │   │   └── FastAPI running on Gunicorn
 │   └── Static Web App (cenet-frontend)
@@ -178,12 +178,12 @@ And you can:
 4. ✅ Run these commands to check status:
    ```powershell
    # Check Azure resources exist
-   az group show --name cenet-rg
-   az webapp show --name cenet-backend --resource-group cenet-rg
-   az staticwebapp show --name cenet-frontend --resource-group cenet-rg
+   az group show --name rgCenet
+   az webapp show --name cenet-backend --resource-group rgCenet
+   az staticwebapp show --name cenet-frontend --resource-group rgCenet
    
    # Check logs
-   az webapp log stream --name cenet-backend --resource-group cenet-rg
+   az webapp log stream --name cenet-backend --resource-group rgCenet
    ```
 
 ## 🎯 Next Steps

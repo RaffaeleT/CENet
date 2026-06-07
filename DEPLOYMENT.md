@@ -44,11 +44,11 @@ VITE_API_BASE_URL=https://your-backend-app.azurewebsites.net
 ```bash
 # Create resource group
 az group create \
-  --name cenet-rg \
-  --location eastus
+  --name rgCenet \
+  --location italynorth
 
 # Verify
-az group show --name cenet-rg
+az group show --name rgCenet
 ```
 
 ### 2b. Backend - App Service for FastAPI
@@ -57,21 +57,21 @@ az group show --name cenet-rg
 # Create App Service Plan (F1 = free tier, sufficient for 1-5 test users)
 az appservice plan create \
   --name cenet-backend-plan \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --sku F1 \
   --is-linux
 
 # Create App Service (Python 3.11)
 az webapp create \
   --name cenet-backend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --plan cenet-backend-plan \
   --runtime "PYTHON:3.11"
 
 # Get the app URL
 az webapp show \
   --name cenet-backend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --query defaultHostName
 ```
 
@@ -81,7 +81,7 @@ az webapp show \
 # Create Static Web App (must use eastus or westus2)
 az staticwebapp create \
   --name cenet-frontend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --location eastus \
   --source https://github.com/YOUR_USERNAME/CENet \
   --branch main \
@@ -93,7 +93,7 @@ az staticwebapp create \
 # Get the app URL
 az staticwebapp show \
   --name cenet-frontend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --query "defaultHostname"
 ```
 
@@ -107,7 +107,7 @@ az staticwebapp show \
 # Set app settings in App Service
 az webapp config appsettings set \
   --name cenet-backend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --settings \
     DATABASE_URL="postgresql://[user]:[password]@[host]:[port]/[database]" \
     SECRET_KEY="$(openssl rand -hex 32)" \
@@ -119,7 +119,7 @@ az webapp config appsettings set \
 # Verify settings
 az webapp config appsettings list \
   --name cenet-backend-app \
-  --resource-group cenet-rg
+  --resource-group rgCenet
 ```
 
 ### 3b. Configure Python Environment
@@ -128,13 +128,13 @@ az webapp config appsettings list \
 # Set Python version and startup command
 az webapp config set \
   --name cenet-backend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --startup-file "gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 main:app"
 
 # Enable SCM (needed for Git deployment)
 az webapp deployment source config-local-git \
   --name cenet-backend-app \
-  --resource-group cenet-rg
+  --resource-group rgCenet
 ```
 
 ### 3c. Deploy Backend with Git
@@ -143,7 +143,7 @@ az webapp deployment source config-local-git \
 # Get Git deployment URL
 GIT_URL=$(az webapp deployment source config-local-git \
   --name cenet-backend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --query url \
   --output tsv)
 
@@ -162,7 +162,7 @@ Create `requirements.txt` deployment trigger:
 
 ```bash
 # SSH into the app to install dependencies
-az webapp ssh --name cenet-backend-app --resource-group cenet-rg
+az webapp ssh --name cenet-backend-app --resource-group rgCenet
 
 # Inside the SSH session:
 cd /home/site/wwwroot
@@ -187,7 +187,7 @@ gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0
 # Add environment variables to Static Web App
 az staticwebapp appsettings set \
   --name cenet-frontend-app \
-  --resource-group cenet-rg \
+  --resource-group rgCenet \
   --setting-names \
     VITE_API_BASE_URL="https://cenet-backend-app.azurewebsites.net"
 ```
@@ -233,7 +233,7 @@ BACKEND_URL="https://cenet-backend-app.azurewebsites.net"
 curl "$BACKEND_URL/docs"
 
 # Check logs
-az webapp log stream --name cenet-backend-app --resource-group cenet-rg
+az webapp log stream --name cenet-backend-app --resource-group rgCenet
 ```
 
 ### 6b. Test Frontend
@@ -251,7 +251,7 @@ If you need to run migrations or initialize tables:
 
 ```bash
 # SSH into backend app
-az webapp ssh --name cenet-backend-app --resource-group cenet-rg
+az webapp ssh --name cenet-backend-app --resource-group rgCenet
 
 # Run migrations or setup scripts
 python -m alembic upgrade head
@@ -263,13 +263,13 @@ python scripts/init_db.py
 
 ```bash
 # View real-time backend logs
-az webapp log stream --name cenet-backend-app --resource-group cenet-rg
+az webapp log stream --name cenet-backend-app --resource-group rgCenet
 
 # View Static Web App logs
-az staticwebapp logs --name cenet-frontend-app --resource-group cenet-rg
+az staticwebapp logs --name cenet-frontend-app --resource-group rgCenet
 
 # Check App Service health
-az webapp show --name cenet-backend-app --resource-group cenet-rg
+az webapp show --name cenet-backend-app --resource-group rgCenet
 ```
 
 ## Troubleshooting
@@ -277,17 +277,17 @@ az webapp show --name cenet-backend-app --resource-group cenet-rg
 ### Backend returns 500 errors
 ```bash
 # Check logs
-az webapp log stream --name cenet-backend-app --resource-group cenet-rg
+az webapp log stream --name cenet-backend-app --resource-group rgCenet
 
 # SSH and test locally
-az webapp ssh --name cenet-backend-app --resource-group cenet-rg
+az webapp ssh --name cenet-backend-app --resource-group rgCenet
 python -c "from database import engine; print(engine.url)"
 ```
 
 ### CORS errors on frontend
 - Verify `FRONTEND_URL` is set in backend app settings
 - Update `CORS` origins in `backend/main.py`
-- Restart app: `az webapp restart --name cenet-backend-app --resource-group cenet-rg`
+- Restart app: `az webapp restart --name cenet-backend-app --resource-group rgCenet`
 
 ### Database connection issues
 - Verify Supabase connection string is correct
@@ -298,7 +298,7 @@ python -c "from database import engine; print(engine.url)"
 
 ```bash
 # Delete everything
-az group delete --name cenet-rg --yes
+az group delete --name rgCenet --yes
 ```
 
 ## Next Steps
