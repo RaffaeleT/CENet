@@ -22,7 +22,6 @@ from admin import router as admin_router
 from subscriptions import router as subscriptions_router
 from rec_energy import router as rec_energy_router
 from personal_energy import router as personal_energy_router
-from public_roi import router as public_roi_router
 from rec_incentives import router as rec_incentives_router
 from newsletter import router as newsletter_router
 
@@ -116,7 +115,6 @@ app.include_router(admin_router)
 app.include_router(subscriptions_router)
 app.include_router(rec_energy_router)
 app.include_router(personal_energy_router)
-app.include_router(public_roi_router)
 app.include_router(rec_incentives_router)
 app.include_router(newsletter_router)
 

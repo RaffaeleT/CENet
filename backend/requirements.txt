@@ -31,3 +31,5 @@ httpx
 itsdangerous
 pandas
 openpyxl
+gunicorn
+python-decouple

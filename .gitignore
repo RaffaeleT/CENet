@@ -1,21 +1,20 @@
-# Dependencies
-node_modules/
+# ---- OS / editor ----
+.DS_Store
 
-# Build output
-dist/
+# ---- frontend (Vite / Node) ----
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
 
-# Vite cache
-.vite/
-
-# Python
-venv/
-.venv/
+# ---- backend (Python) ----
 __pycache__/
 *.pyc
+venv/
+.venv/
+backend/test.db
 
-# Environment
+# ---- secrets ----
 .env
-test.db
-
-# OS
-.DS_Store
+.env.*
+!.env.example
