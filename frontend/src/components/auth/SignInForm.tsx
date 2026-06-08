@@ -140,20 +140,9 @@ if (user.role === "admin") {
 
               {error && <p className="text-sm text-red-500">{error}</p>}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Checkbox checked={isChecked} onChange={setIsChecked} />
-                  <span className="text-sm text-gray-700">
-                    Keep me logged in
-                  </span>
-                </div>
-
-                <Link
-                  to="/reset-password"
-                  className="text-sm text-[#159570] hover:underline"
-                >
-                  Forgot password?
-                </Link>
+              <div className="flex items-center gap-3">
+                <Checkbox checked={isChecked} onChange={setIsChecked} />
+                <span className="text-sm text-gray-700">Keep me logged in</span>
               </div>
 
               <Button
