@@ -32,9 +32,10 @@ jobs:
 
       - name: Build
         working-directory: ./frontend
+        # VITE_API_BASE_URL is read from frontend/.env.production (committed).
+        # Do not pass it as a shell env var here: an unset/empty GitHub secret
+        # would override the .env file and bake an empty backend URL into the bundle.
         run: npm run build
-        env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1

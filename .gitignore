@@ -18,5 +18,8 @@ backend/test.db
 .env
 .env.*
 !.env.example
+# Production frontend config holds only the public backend URL (no secrets) and
+# must be committed so `vite build` in CI bakes VITE_API_BASE_URL into the bundle.
+!frontend/.env.production
 
 .mcp.json
